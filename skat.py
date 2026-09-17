@@ -306,7 +306,15 @@ class Strategy(ABC):
     @abstractmethod
     def decide_bid_limit(self, me: Player, table: "SkatRound") -> int:
         """The highest game value this player is willing to be committed to.
-        Return 0 to pass."""
+        Return 0 to pass.  Bots answer the live auction from this number; the
+        human overrides `will_bid` and answers each bid interactively instead."""
+
+    def will_bid(self, me: Player, table: "SkatRound", value: int, as_caller: bool) -> bool:
+        """Answer one step of the live auction: are you willing to be committed
+        to `value`?  `as_caller` is True when it is your turn to *name* the number,
+        False when you are being asked to *hold* someone else's.  The default
+        (used by bots) just compares against your cached bid limit."""
+        return value <= table.bid_limit_of(me)
 
     @abstractmethod
     def declare_contract(self, me: Player, table: "SkatRound"):
@@ -636,17 +644,20 @@ def _ask_int(prompt: str, low: int, high: int) -> int:
 class HumanStrategy(Strategy):
 
     def decide_bid_limit(self, me: Player, table: "SkatRound") -> int:
-        print(f"\nYour hand: {show_cards(me.hand)}")
-        best = max(evaluate_games(me.hand, True, True), key=lambda g: g.game_value)
-        if best.game_type is GameType.GRAND:
-            label, detail = "Grand", f"with/without {best.matadors}"
-        elif best.game_type is GameType.NULL:
-            label, detail = "Null", "no trumps, take no trick"
-        else:
-            label, detail = best.trump_suit.name.title(), f"with/without {best.matadors}"
-        print(f"  Your strongest game looks like {label}: {detail}, worth {best.game_value}.")
-        print(f"  (Null risk score {null_risk(me.hand):.1f} - lower is safer for Null.)")
-        return _ask_int("  Your maximum bid (0 to pass): ", 0, 300)
+        # Unused by the live auction (the human answers each bid via will_bid),
+        # but the interface requires it.  Return 0 so it never affects anything.
+        return 0
+
+    def will_bid(self, me: Player, table: "SkatRound", value: int, as_caller: bool) -> bool:
+        prompt = (f"  [{me.name}] Bid {value}? (y/n): " if as_caller
+                  else f"  [{me.name}] {value} bid against you -- hold it? (y/n): ")
+        while True:
+            reply = input(prompt).strip().lower()
+            if reply.startswith("y"):
+                return True
+            if reply.startswith("n"):
+                return False
+            print("  (please answer y or n)")
 
     def declare_contract(self, me: Player, table: "SkatRound"):
         print(f"\nYou won the auction at {table.winning_bid}.  Your 12 cards:")
@@ -826,25 +837,75 @@ class SkatRound:
             self.log(f"  {self._tag(seat):<28} {fmt_cards(seat.hand)}")
         self.log(f"  Skat (face down):            {fmt_cards(self.skat)}")
 
+    def bid_limit_of(self, p: Player) -> int:
+        """A bot's highest acceptable bid, computed once per auction."""
+        return self._bot_limits.get(p, 0)
+
+    def _announce(self, message: str):
+        print(f"  {message}")
+        self.log(f"  {message}")
+
+    def _duel(self, caller: Player, holder: Player, floor: int, ladder: list[int]):
+        """One side of the auction: `caller` names ascending values and `holder`
+        answers each.  Returns (survivor, highest_value_reached).
+
+        Skat's tie-break falls out naturally: the caller must always go one step
+        *higher* to stay in, so if both are willing to the same number, the holder
+        wins -- they merely held it, the caller ran out of room above it."""
+        current = floor
+        while True:
+            higher = [v for v in ladder if v > current]
+            if not higher:
+                return holder, current                 # ceiling reached; holder wins
+            nxt = higher[0]
+            if not caller.strategy.will_bid(caller, self, nxt, as_caller=True):
+                if current > floor or floor == 0:
+                    self._announce(f"{caller.name} passes")
+                return holder, current                 # caller drops; holder survives
+            self._announce(f"{caller.name} bids {nxt}")
+            if holder.strategy.will_bid(holder, self, nxt, as_caller=False):
+                self._announce(f"{holder.name} holds {nxt}")
+                current = nxt                           # holder stays; caller must raise
+            else:
+                self._announce(f"{holder.name} passes")
+                return caller, nxt                      # holder drops; caller wins at nxt
+
     def run_auction(self) -> Optional[Player]:
-        limits = {p: p.strategy.decide_bid_limit(p, self) for p in self.order}
+        ladder = valid_bids()
+        F, M, R = self.forehand, self.middlehand, self.rearhand
+        self._bot_limits = {p: p.strategy.decide_bid_limit(p, self)
+                            for p in self.order
+                            if not isinstance(p.strategy, HumanStrategy)}
+
+        # Show the human their hand and a suggestion before they start answering.
+        for p in self.order:
+            if isinstance(p.strategy, HumanStrategy):
+                best = max(evaluate_games(p.hand, True, True), key=lambda g: g.game_value)
+                label = ("Grand" if best.game_type is GameType.GRAND else
+                         "Null" if best.game_type is GameType.NULL else
+                         best.trump_suit.name.title())
+                print(f"\nYour hand: {show_cards(p.hand)}")
+                print(f"  Strongest game looks like {label}, worth about {best.game_value}"
+                      f" (Null risk {null_risk(p.hand):.1f}, lower is safer).")
+
         self.log("")
         self.log("Auction:")
-        for p in self.order:
-            self.log(f"  {self._tag(p):<28} willing up to {limits[p]}")
-        if max(limits.values()) < 18:
-            self.log("  -> all passed; hand thrown in.")
-            return None  # everyone passed -> the hand is thrown in
-        # Highest limit wins; ties go to the earlier seat (they held first).
-        winner = max(self.order, key=lambda p: (limits[p], -self.order.index(p)))
-        contest = max(limits[p] for p in self.order if p is not winner)
-        ladder = valid_bids()
-        playable = [v for v in ladder if v <= contest]
-        self.winning_bid = max(playable) if playable else 18
+        # Middlehand bids to Forehand; the survivor then answers Rearhand.
+        survivor, level = self._duel(caller=M, holder=F, floor=0, ladder=ladder)
+        winner, level = self._duel(caller=R, holder=survivor, floor=level, ladder=ladder)
+
+        if level == 0:
+            # Nobody ever made a bid.  Forehand may still take the game at 18.
+            if winner.strategy.will_bid(winner, self, 18, as_caller=True):
+                level = 18
+            else:
+                self._announce("everybody passed -- the hand is thrown in.")
+                return None
+
+        self.winning_bid = level
         self.declarer = winner
         self.contract = None
-        self.log(f"  -> {self._tag(winner)} wins at {self.winning_bid}.")
-        print(f"\n{winner.name} wins the auction at {self.winning_bid}.")
+        self._announce(f"-> {winner.name} wins the auction at {level}.")
         return winner
 
     def declaration_phase(self):
@@ -967,8 +1028,7 @@ class SkatRound:
     def play(self):
         self.deal()
         if self.run_auction() is None:
-            print("\nEverybody passed -- the hand is thrown in.")
-            return
+            return   # everybody passed; run_auction already announced it
         self.declaration_phase()
         self.play_tricks()
         self.settle()

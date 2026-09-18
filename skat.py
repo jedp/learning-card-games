@@ -829,9 +829,15 @@ class SkatRound:
         self.skat = deck[30:32]
         self.dealt = {p: list(p.hand) for p in self.order}
 
+        seating = (f"Dealer (rearhand): {self.rearhand.name}  |  "
+                   f"Forehand (leads): {self.forehand.name}  |  "
+                   f"Middlehand: {self.middlehand.name}")
+        print(f"\n{seating}")
+
         self.log("=" * 70)
         self.log(f"HAND {self.hand_number}   (dealer: {self.rearhand.name})")
         self.log("=" * 70)
+        self.log(seating)
         self.log("Dealt hands (hidden info, for analysis):")
         for seat in self.order:
             self.log(f"  {self._tag(seat):<28} {fmt_cards(seat.hand)}")

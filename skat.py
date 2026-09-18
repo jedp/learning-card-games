@@ -342,16 +342,28 @@ class HeuristicStrategy(Strategy):
     trumps and fights for tricks; `plays_grand` lets it consider Grand."""
 
     def __init__(self, bid_threshold: float, aggression: float,
-                 plays_grand: bool = True, plays_null: bool = True):
-        self.bid_threshold = bid_threshold
+                 plays_grand: bool = True, plays_null: bool = True,
+                 make_target: float = 58.0):
+        self.bid_threshold = bid_threshold        # Null safety gate (12 - risk)
         self.aggression = aggression
         self.plays_grand = plays_grand
         self.plays_null = plays_null
+        self.make_target = make_target            # card points it must expect to take
 
     # -- bidding ---------------------------------------------------------- #
+    def _makeable(self, hand, g: GameEstimate) -> bool:
+        """Realism check: a suit/Grand game is only worth bidding if the hand
+        looks like it can actually take 61.  This stops bots from bidding huge
+        'without N' paper values on hands with no trump control.  Null uses its
+        own safety score instead."""
+        if g.game_type is GameType.NULL:
+            return g.strength >= self.bid_threshold
+        contract = Contract(g.game_type, g.trump_suit)
+        return estimate_declarer_points(hand, contract) >= self.make_target
+
     def _best_game(self, hand) -> Optional[GameEstimate]:
         viable = [g for g in evaluate_games(hand, self.plays_grand, self.plays_null)
-                  if g.strength >= self.bid_threshold]
+                  if self._makeable(hand, g)]
         return max(viable, key=lambda g: g.game_value) if viable else None
 
     def decide_bid_limit(self, me: Player, table: "SkatRound") -> int:
@@ -360,13 +372,16 @@ class HeuristicStrategy(Strategy):
 
     # -- declaring & discarding ------------------------------------------ #
     def declare_contract(self, me: Player, table: "SkatRound"):
-        # Re-evaluate on the fuller 12-card hand.  Take the highest-value game
-        # the hand can actually support; only fall back to raw value if nothing
-        # clears the confidence bar.
+        # Re-evaluate on the fuller 12-card hand.  Prefer the highest-value game
+        # the hand can actually make; if none clears the bar (e.g. the Skat hurt
+        # us), fall back to whichever game we expect the most points from.
         options = evaluate_games(me.hand, self.plays_grand, self.plays_null)
-        supported = [g for g in options if g.strength >= self.bid_threshold]
-        chosen = (max(supported, key=lambda g: g.game_value) if supported
-                  else max(options, key=lambda g: g.strength))
+        makeable = [g for g in options if self._makeable(me.hand, g)]
+        if makeable:
+            chosen = max(makeable, key=lambda g: g.game_value)
+        else:
+            chosen = max(options, key=lambda g: estimate_declarer_points(
+                me.hand, Contract(g.game_type, g.trump_suit)))
         contract = Contract(chosen.game_type, chosen.trump_suit, me)
         discards = self._pick_discards(me.hand, contract)
         return Declaration(chosen.game_type, chosen.trump_suit), discards
@@ -429,13 +444,13 @@ class HeuristicStrategy(Strategy):
 
 
 def CautiousStrategy() -> HeuristicStrategy:
-    """Bids only strong hands, plays it safe."""
-    return HeuristicStrategy(bid_threshold=8.0, aggression=0.2)
+    """Bids only hands it clearly makes, plays it safe."""
+    return HeuristicStrategy(bid_threshold=8.0, aggression=0.2, make_target=60.0)
 
 
 def AggressiveStrategy() -> HeuristicStrategy:
-    """Bids thin, hunts trumps and tricks."""
-    return HeuristicStrategy(bid_threshold=5.5, aggression=0.9)
+    """Bids on thinner hands, hunts trumps and tricks."""
+    return HeuristicStrategy(bid_threshold=5.5, aggression=0.9, make_target=50.0)
 
 
 def play_to_lose(me: Player, table: "SkatRound", legal: list[Card]) -> Card:
@@ -540,7 +555,7 @@ class CardCountingDefender(HeuristicStrategy):
 
 def CountingDefenderStrategy() -> CardCountingDefender:
     """A solid, card-counting opponent (plays a normal game when it declares)."""
-    return CardCountingDefender(bid_threshold=7.0, aggression=0.5)
+    return CardCountingDefender(bid_threshold=7.0, aggression=0.5, make_target=55.0)
 
 
 class RandomStrategy(Strategy):
@@ -603,6 +618,45 @@ def evaluate_games(hand, allow_grand: bool, allow_null: bool = False) -> list[Ga
         estimates.append(GameEstimate(GameType.NULL, None, 0,
                                       NULL_VALUE, max(0.0, 12.0 - null_risk(hand))))
     return estimates
+
+
+def _trump_tricks(hand, contract: Contract) -> int:
+    """How many trump tricks this hand is likely to win, counted top-down: walk
+    the trump order and, for each of your trumps, it wins unless an outstanding
+    higher trump is waiting to beat it.  This is what tells you a big 'without'
+    hand has *no* control -- its best trump sits under everyone else's."""
+    held = set(hand)
+    higher_out = 0          # outstanding trumps ranked above the ones left to test
+    winners = 0
+    for card in matador_sequence(contract):
+        if card in held:
+            if higher_out > 0:
+                higher_out -= 1     # a higher opponent trump takes this one
+            else:
+                winners += 1        # nothing above it: a trump trick
+        else:
+            higher_out += 1
+    return winners
+
+
+def estimate_declarer_points(hand, contract: Contract) -> float:
+    """A rough guess at how many of the 120 card points this hand takes as declarer
+    of `contract`.  Bots use it so they bid what they can *make* (take 61), not the
+    inflated paper value of an unplayable 'without N' hand."""
+    if contract.game_type is GameType.NULL:
+        return 0.0                                  # Null isn't scored on points
+    winners = _trump_tricks(hand, contract)
+    n_trump = sum(1 for c in hand if is_trump(c, contract))
+    side_aces = sum(1 for c in hand if c.rank is Rank.ACE and not is_trump(c, contract))
+    side_tens = sum(1 for c in hand if c.rank is Rank.TEN and not is_trump(c, contract))
+    # Side Aces get ruffed sometimes in a suit game; never in Grand.
+    ruff = 1.0 if contract.game_type is GameType.GRAND else 0.85
+    points = winners * 8.0                            # each trump trick: card + capture
+    points += side_aces * 13.0 * ruff                 # Aces usually win their trick
+    points += side_tens * 8.0 * ruff                  # Tens often score
+    points += max(0, n_trump - 4) * 4.0               # extra trump length wins late tricks
+    points += 7.0                                     # the Skat you pick up
+    return points
 
 
 # --------------------------------------------------------------------------- #
@@ -886,13 +940,20 @@ class SkatRound:
         # Show the human their hand and a suggestion before they start answering.
         for p in self.order:
             if isinstance(p.strategy, HumanStrategy):
-                best = max(evaluate_games(p.hand, True, True), key=lambda g: g.game_value)
+                # Rank by trick-taking strength, NOT by raw game value: a jackless
+                # hand's highest "value" is a huge unplayable "without-N" number.
+                best = max(evaluate_games(p.hand, True, True), key=lambda g: g.strength)
                 label = ("Grand" if best.game_type is GameType.GRAND else
                          "Null" if best.game_type is GameType.NULL else
                          best.trump_suit.name.title())
+                jacks = sum(1 for c in p.hand if c.rank is Rank.JACK)
+                caveat = "  -- but with no Jacks this is weak; likely a pass" if jacks == 0 \
+                    else ("  -- only one Jack, be cautious" if jacks == 1 else "")
                 print(f"\nYour hand: {show_cards(p.hand)}")
-                print(f"  Strongest game looks like {label}, worth about {best.game_value}"
-                      f" (Null risk {null_risk(p.hand):.1f}, lower is safer).")
+                print(f"  Best playable game looks like {label} "
+                      f"(value {best.game_value} if you make it){caveat}.")
+                print(f"  Jacks held: {jacks}.  Null risk {null_risk(p.hand):.1f} "
+                      f"(lower is safer for Null).")
 
         self.log("")
         self.log("Auction:")
@@ -1031,13 +1092,16 @@ class SkatRound:
                  f"{sheet.game_value if sheet.made else 2 * sheet.game_value}).")
         self.log("")
 
-    def play(self):
+    def play(self) -> bool:
+        """Play one deal.  Returns True if a game was played, False if the hand
+        was passed in (so the caller can re-deal)."""
         self.deal()
         if self.run_auction() is None:
-            return   # everybody passed; run_auction already announced it
+            return False   # everybody passed; run_auction already announced it
         self.declaration_phase()
         self.play_tricks()
         self.settle()
+        return True
 
 
 def valid_bids() -> list[int]:
@@ -1075,9 +1139,15 @@ def play_match(rounds: int = 3, seed: Optional[int] = None,
         print("\n" + "=" * 60)
         print(f"HAND {r + 1} of {rounds}   (dealer: {players[r % 3].name})")
         print("=" * 60)
-        for p in players:      # reset per-hand state
-            p.won_cards, p.tricks = [], 0
-        SkatRound(players, dealer_index=r % 3, logger=logger, hand_number=r + 1).play()
+        # If everybody passes, re-deal the same hand until a game is actually
+        # played, so the player never sits through a dud.
+        for attempt in range(25):
+            for p in players:      # reset per-hand state
+                p.won_cards, p.tricks = [], 0
+            if SkatRound(players, dealer_index=r % 3, logger=logger,
+                         hand_number=r + 1).play():
+                break
+            print("  (passed in -- re-dealing)")
 
     print("\n" + "#" * 60)
     print("FINAL SCORES")

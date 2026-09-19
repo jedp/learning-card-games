@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skat — Table Reference</title>
+<style>
+  :root {
+    --ink:      #1a1614;
+    --ink-soft: #55483f;
+    --rule:     #cabeaf;
+    --accent:   #7d2230;
+    --red:      #b3202f;
+    --wash:     #f4efe6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { background: #2e2a26; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  /* The sheet: a Letter page preview on screen, the page itself in print. */
+  .sheet {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto;
+    padding: 0.45in;
+    background: #fff;
+    box-shadow: 0 2px 28px rgba(0,0,0,.45);
+  }
+
+  /* ---- masthead ---- */
+  header {
+    border-bottom: 2.5pt solid var(--accent);
+    padding-bottom: 3pt;
+    margin-bottom: 9pt;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12pt;
+  }
+  h1 {
+    margin: 0;
+    font-size: 21pt;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .tagline {
+    font-size: 7.5pt;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: right;
+    line-height: 1.3;
+  }
+
+  /* ---- three-column flow ---- */
+  .cols {
+    column-count: 3;
+    column-gap: 16pt;
+    column-rule: 0.5pt solid var(--rule);
+    font-size: 7.5pt;
+    line-height: 1.32;
+  }
+
+  section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin: 0 0 7.5pt;
+  }
+
+  h2 {
+    font-size: 8.2pt;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 3pt;
+    padding-bottom: 1.5pt;
+    border-bottom: 0.5pt solid var(--rule);
+  }
+  h3 {
+    font-size: 7.6pt;
+    font-weight: 700;
+    margin: 5pt 0 2pt;
+    color: var(--ink);
+  }
+
+  p  { margin: 0 0 3.5pt; }
+  b, strong { font-weight: 700; }
+  em { font-style: italic; color: var(--ink-soft); }
+
+  ul, ol { margin: 0 0 3.5pt; padding-left: 11pt; }
+  li { margin-bottom: 1.5pt; }
+
+  /* ---- tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 4pt;
+    font-size: 7.4pt;
+  }
+  td {
+    padding: 1.3pt 0;
+    vertical-align: baseline;
+    border-bottom: 0.4pt dotted var(--rule);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.n {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding-left: 5pt;
+  }
+  table.split td.n { padding-right: 7pt; }
+  table.split td:nth-child(3) { padding-left: 5pt; }
+  table.tight td { border-bottom: none; padding: 0.8pt 0; }
+  table.tight td:first-child {
+    padding-right: 6pt;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+
+  /* ---- accents ---- */
+  .hearts, .diams { color: var(--red); }
+  .card { white-space: nowrap; font-weight: 700; }
+  .order {
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  .box {
+    background: var(--wash);
+    border-left: 2pt solid var(--accent);
+    padding: 3.5pt 5pt;
+    margin: 0 0 4pt;
+  }
+  .box p:last-child { margin-bottom: 0; }
+
+  .warn { color: var(--accent); font-weight: 700; }
+
+  .formula {
+    text-align: center;
+    font-style: italic;
+    padding: 2.5pt 0;
+    margin: 0 0 4pt;
+    border-top: 0.5pt solid var(--rule);
+    border-bottom: 0.5pt solid var(--rule);
+  }
+
+  footer {
+    margin-top: 9pt;
+    padding-top: 3pt;
+    border-top: 0.75pt solid var(--rule);
+    font-size: 6.6pt;
+    font-style: italic;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---- print ---- */
+  @page { size: letter portrait; margin: 0.4in; }
+
+  @media print {
+    html { background: #fff; }
+    body { padding: 0; font-size: 12pt; }
+    .sheet {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+  }
+
+  /* On small screens, stop pretending to be paper. */
+  @media screen and (max-width: 900px) {
+    body { padding: 10px; }
+    .sheet { width: auto; min-height: 0; padding: 14px; }
+    .cols { column-count: 1; font-size: 11pt; line-height: 1.45; }
+    h1 { font-size: 17pt; }
+    h2 { font-size: 11pt; }
+    table, .formula { font-size: 10.5pt; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <h1>Skat</h1>
+    <div class="tagline">
+      Three players · 32 cards · 10 each + 2 Skat<br>
+      120 card points · declarer needs 61
+    </div>
+  </header>
+
+  <div class="cols">
+
+    <section>
+      <h2>Setup</h2>
+      <p>Deal in packets, clockwise from Forehand:
+      <b>3 each — 2 to Skat — 4 each — 3 each</b>.</p>
+      <p>Declarer plays alone against two defenders.</p>
+    </section>
+
+    <section>
+      <h2>Card points</h2>
+      <table class="split">
+        <tr><td>A</td><td class="n">11</td><td>Q</td><td class="n">3</td></tr>
+        <tr><td>10</td><td class="n">10</td><td>J</td><td class="n">2</td></tr>
+        <tr><td>K</td><td class="n">4</td><td>9 · 8 · 7</td><td class="n">0</td></tr>
+      </table>
+      <p>Quirks: the <b>10 beats the K</b>; the <b>Jacks are the top trumps</b>
+      and are worth only 2.</p>
+    </section>
+
+    <section>
+      <h2>Trumps &amp; rank</h2>
+      <p><b>Jacks are ALWAYS trump</b>, and a Jack is never its face suit:</p>
+      <p class="order">J♣ &gt; J♠ &gt; <span class="hearts">J♥</span> &gt;
+      <span class="diams">J♦</span></p>
+
+      <h3>Suit game (say ♣)</h3>
+      <p><span class="card">J♣ J♠ J♥ J♦ · A 10 K Q 9 8 7</span> of ♣
+      = <b>11 trumps</b>.<br>
+      Other suits rank <span class="card">A 10 K Q 9 8 7</span>.</p>
+
+      <h3>Grand</h3>
+      <p>Only the <b>four Jacks</b> are trump.</p>
+
+      <h3>Null</h3>
+      <p><b>No trump at all</b>, and the rank order flips to
+      <span class="card">7 8 9 10 J Q K A</span>.
+      Declarer must take <b>zero tricks</b>.</p>
+    </section>
+
+    <section>
+      <h2>Winning</h2>
+      <table>
+        <tr><td>Declarer needs</td><td class="n">61</td></tr>
+        <tr><td>Defenders need</td><td class="n">60</td></tr>
+        <tr><td><b>Schneider</b> — loser ≤ 30</td><td class="n">bonus</td></tr>
+        <tr><td><b>Schwarz</b> — loser takes no trick</td><td class="n">bonus</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Value &amp; matadors</h2>
+      <p class="formula">game value = base × multiplier</p>
+
+      <h3>Base — gets multiplied</h3>
+      <table class="split">
+        <tr><td><span class="diams">♦</span></td><td class="n">9</td>
+            <td>♠</td><td class="n">11</td></tr>
+        <tr><td><span class="hearts">♥</span></td><td class="n">10</td>
+            <td>♣</td><td class="n">12</td></tr>
+        <tr><td><b>Grand</b></td><td class="n">24</td>
+            <td colspan="2"></td></tr>
+      </table>
+
+      <h3>Null — fixed, never multiplied</h3>
+      <table class="split">
+        <tr><td>Null</td><td class="n">23</td>
+            <td>Ouvert</td><td class="n">46</td></tr>
+        <tr><td>Hand</td><td class="n">35</td>
+            <td>Hand Ouvert</td><td class="n">59</td></tr>
+      </table>
+
+      <h3>Multiplier</h3>
+      <p><b>matadors + 1</b> (for the game) <b>+ 1</b> for Hand
+      <b>+ 1</b> per bonus (Schneider, Schwarz).</p>
+      <p><b>Hand</b> = you played without picking up the Skat.</p>
+
+      <h3>Matadors</h3>
+      <p>The <b>unbroken run of top trumps from J♣ downward</b>.</p>
+      <table class="tight">
+        <tr><td>Hold J♣</td><td><b>“with N”</b> — how many in a row you hold</td></tr>
+        <tr><td>Miss J♣</td><td><b>“without N”</b> — how many in a row you lack</td></tr>
+      </table>
+      <p>Same multiplier either way. <em>A big “without” means the top trumps
+      are AGAINST you — a weak hand with a high paper value.</em></p>
+      <div class="box">
+        <p>Clubs, <b>with J♣ J♠ J♥</b> = with 3 → 12 × 4 = <b>48</b></p>
+        <p>Clubs, <b>missing J♣</b> = without 1 → 12 × 2 = <b>24</b></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bidding</h2>
+      <p>Numbers are <b>game values</b>: 18, 20, 22, 23, 24, 27, 30, 33, 36,
+      40, … You name a <b>game</b> only after winning the auction.</p>
+      <p><b>Middlehand bids to Forehand; the survivor bids to Rearhand.</b>
+      On a tie the <b>holder</b> wins — Forehand &gt; Middlehand &gt; Rearhand.</p>
+      <p><b>Safe ceiling = base × (matadors + 1).</b> Bid to here freely; go
+      past it only if a Schneider is a lock.</p>
+      <p><span class="warn">⚠ Overbid = automatic loss.</span> If your final
+      game value is below your bid you lose no matter how many points you took.
+      <em>The Skat can raise or lower your matadors.</em></p>
+
+      <h3>Open the bidding when</h3>
+      <p>You hold <b>J♣ or J♠</b> <b>+</b> a <b>five-card trump suit</b>
+      (or Jacks and Aces for Grand) <b>+</b> a <b>side Ace</b>.<br>
+      <b>No Jacks ≈ pass.</b></p>
+    </section>
+
+    <section>
+      <h2>Play basics</h2>
+      <p><b>Follow suit if you can</b>; otherwise play anything. A Jack counts
+      as <b>trump</b>, not as its face suit.</p>
+      <p>Highest trump wins; with no trump, the highest card of the led suit.</p>
+      <p><b>Forehand leads first</b>; the winner of each trick leads the next.</p>
+      <p><b>Master card</b> = every higher card is gone. <span class="warn">A King
+      is not a master until the Ace AND the Ten have appeared.</span></p>
+    </section>
+
+    <section>
+      <h2>Declarer — offence</h2>
+      <ol>
+        <li><b>Discard into the Skat</b> to bank points and make a void.</li>
+        <li><b>Draw trumps first</b> — lead a low Jack to flush a higher one —
+          <i>then</i> cash Aces.</li>
+        <li><b>Run your winners.</b> Count trumps down so you know when the side
+          suits are safe.</li>
+        <li><b>Never overbid</b>, and don't cash a side Ace while a defender can
+          still ruff.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Defenders — one team, target 60</h2>
+      <ol>
+        <li><b>Smear</b> — pile high cards onto your <b>partner's</b> winning
+          tricks.</li>
+        <li><b>Starve</b> — play your <b>cheapest</b> card onto the declarer's
+          winning tricks. Never feed an A/10/K where a 7/8/9 will do. Applies to
+          discards too.</li>
+        <li><b>Don't lead into his Aces or voids.</b> Make the declarer lead his
+          own long suits.</li>
+        <li><b>Lead trumps when you are trump-strong</b>; don't when you're
+          weak.</li>
+        <li><b>Cash your masters</b> the moment the declarer is out of trumps.</li>
+        <li><b>Track voids</b> — once he ruffs a suit, stop leading it.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Two-question lead check</h2>
+      <ol>
+        <li><b>Do I hold a master here?</b> (every higher card gone) → cash it.</li>
+        <li><b>If not, has the Ace of this suit appeared?</b> If no →
+          <b>don't lead into it.</b></li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Count in layers</h2>
+      <p>Build one layer at a time:</p>
+      <p class="formula">Jacks (4) → trumps (11 / 4 / 0)<br>
+      → Aces &amp; Tens → running points</p>
+      <p>Count <b>down</b>, remember <b>voids</b>, and update <b>once per
+      trick</b>. You already see your own ten cards — subtract them first.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Skat · table reference</span>
+    <span>Suit · Grand · Null &nbsp;·&nbsp; <span class="diams">♦</span>
+      <span class="hearts">♥</span> ♠ ♣ &nbsp;9 · 10 · 11 · 12</span>
+  </footer>
+
+</div>
+</body>
+</html>

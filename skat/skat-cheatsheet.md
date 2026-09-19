@@ -24,8 +24,11 @@ Declarer needs **61**; defenders need **60**.
 
 ## Value & matadors
 `game value = base × multiplier`
-**Base:** ♦9 ♥10 ♠11 ♣12 · **Grand 24** · **Null 23 / Ouvert 46** (fixed).
-**Multiplier = matadors + 1 (game) + 1 per bonus (Schneider, Schwarz).**
+**Base (gets multiplied):** ♦9 ♥10 ♠11 ♣12 · **Grand 24**.
+**Null is fixed and never multiplied:** **23** · Hand **35** · Ouvert **46** ·
+Hand Ouvert **59**.
+**Multiplier = matadors + 1 (game) + 1 Hand + 1 per bonus (Schneider, Schwarz).**
+**Hand** = you played without picking up the Skat.
 
 **Matadors** = unbroken run of top trumps from **J♣** down:
 - Hold J♣ → **"with N"** (how many you hold in a row).

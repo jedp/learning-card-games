@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piquet — Table Reference</title>
+<style>
+  :root {
+    --ink:      #1a1614;
+    --ink-soft: #55483f;
+    --rule:     #cabeaf;
+    --accent:   #7d2230;
+    --red:      #b3202f;
+    --wash:     #f4efe6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { background: #2e2a26; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  /* The sheet: a Letter page preview on screen, the page itself in print. */
+  .sheet {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto;
+    padding: 0.45in;
+    background: #fff;
+    box-shadow: 0 2px 28px rgba(0,0,0,.45);
+  }
+
+  /* ---- masthead ---- */
+  header {
+    border-bottom: 2.5pt solid var(--accent);
+    padding-bottom: 3pt;
+    margin-bottom: 9pt;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12pt;
+  }
+  h1 {
+    margin: 0;
+    font-size: 21pt;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .tagline {
+    font-size: 7.5pt;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: right;
+    line-height: 1.3;
+  }
+
+  /* ---- three-column flow ---- */
+  .cols {
+    column-count: 3;
+    column-gap: 16pt;
+    column-rule: 0.5pt solid var(--rule);
+    font-size: 7.7pt;
+    line-height: 1.34;
+  }
+
+  section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin: 0 0 8pt;
+  }
+
+  h2 {
+    font-size: 8.2pt;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 3pt;
+    padding-bottom: 1.5pt;
+    border-bottom: 0.5pt solid var(--rule);
+  }
+  h3 {
+    font-size: 7.7pt;
+    font-weight: 700;
+    margin: 5pt 0 2pt;
+    color: var(--ink);
+  }
+
+  p  { margin: 0 0 3.5pt; }
+  b, strong { font-weight: 700; }
+  em { font-style: italic; color: var(--ink-soft); }
+
+  ul, ol { margin: 0 0 3.5pt; padding-left: 11pt; }
+  li { margin-bottom: 1.5pt; }
+
+  /* ---- tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 4pt;
+    font-size: 7.5pt;
+  }
+  td {
+    padding: 1.3pt 0;
+    vertical-align: baseline;
+    border-bottom: 0.4pt dotted var(--rule);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.n {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding-left: 5pt;
+  }
+  table.split td.n { padding-right: 7pt; }
+  table.split td:nth-child(3) { padding-left: 5pt; }
+
+  /* ---- accents ---- */
+  .hearts, .diams { color: var(--red); }
+  .card { white-space: nowrap; font-weight: 700; }
+
+  .box {
+    background: var(--wash);
+    border-left: 2pt solid var(--accent);
+    padding: 3.5pt 5pt;
+    margin: 0 0 4pt;
+  }
+  .box p:last-child { margin-bottom: 0; }
+
+  .warn { color: var(--accent); font-weight: 700; }
+
+  .dialogue {
+    margin: 0 0 4pt;
+    padding-left: 6pt;
+    border-left: 0.75pt solid var(--rule);
+    font-size: 7.3pt;
+  }
+  .dialogue p { margin: 0 0 1.5pt; }
+  .dialogue .who { font-weight: 700; color: var(--accent); }
+  .dialogue .res { font-style: italic; color: var(--ink-soft); }
+
+  footer {
+    margin-top: 9pt;
+    padding-top: 3pt;
+    border-top: 0.75pt solid var(--rule);
+    font-size: 6.6pt;
+    font-style: italic;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---- print ---- */
+  @page { size: letter portrait; margin: 0.4in; }
+
+  @media print {
+    html { background: #fff; }
+    body { padding: 0; font-size: 12pt; }
+    .sheet {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+  }
+
+  /* On small screens, stop pretending to be paper. */
+  @media screen and (max-width: 900px) {
+    body { padding: 10px; }
+    .sheet { width: auto; min-height: 0; padding: 14px; }
+    .cols { column-count: 1; font-size: 11pt; line-height: 1.45; }
+    h1 { font-size: 17pt; }
+    h2 { font-size: 11pt; }
+    table, .dialogue { font-size: 10.5pt; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header>
+    <h1>Piquet</h1>
+    <div class="tagline">
+      Two players · 32 cards · no trumps<br>
+      A <i>partie</i> is six deals
+    </div>
+  </header>
+
+  <div class="cols">
+
+    <section>
+      <h2>Setup</h2>
+      <p>Deck <b>A K Q J 10 9 8 7</b> in each suit. Ace high, 7 low.
+      <b>No trumps, ever.</b></p>
+      <p>Deal <b>12 each</b>. The remaining <b>8</b> form the <b>talon</b>:
+      <b>5 on top</b> (elder's), <b>3 beneath</b> (younger's).</p>
+      <p><b>Elder</b> = non-dealer, and holds a real advantage.
+      <b>Younger</b> = dealer. Six deals to a partie — three as elder each.</p>
+    </section>
+
+    <section>
+      <h2>Order of business</h2>
+      <ol>
+        <li>Deal 12 + 12; lay the talon <b>5 / 3</b>.</li>
+        <li><b>Carte blanche</b> declared — before any discard.</li>
+        <li><b>Elder exchanges</b>, then <b>younger</b>.</li>
+        <li><b>Declarations:</b> point → sequences → sets. Check <b>repique</b>.</li>
+        <li><b>Play</b> twelve tricks. Check <b>pique</b>, then cards / capot.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>The exchange</h2>
+      <p><b>Elder</b> must take at least <b>1</b>, may take up to <b>5</b> from the
+      top packet, and may privately look at any of the five left behind.</p>
+      <p><b>Younger</b> may take up to what remains — <b>3</b>, plus whatever elder
+      declined.</p>
+      <p><em>Settle first: if younger leaves cards and looks at them, elder may see
+      them too.</em></p>
+      <p>Discards are dead. You play twelve either way.</p>
+    </section>
+
+    <section>
+      <h2>Declarations</h2>
+      <div class="box">
+        <p>Three categories, <b>in strict order</b>. In each, the better holding
+        scores <b>all</b> of that player's combinations — the loser scores
+        <b>nothing</b>.</p>
+        <p>One card may count in <b>all three</b>:
+        <span class="card">♠A</span> serves the point, the quart, <i>and</i> four
+        aces.</p>
+      </div>
+
+      <h3>1 · Point — longest suit</h3>
+      <p>Scores <b>1 per card</b>. Ties broken by pips:</p>
+      <table class="split">
+        <tr><td>A</td><td class="n">11</td><td>K Q J 10</td><td class="n">10</td></tr>
+        <tr><td>9 · 8 · 7</td><td class="n" colspan="3">face value</td></tr>
+      </table>
+      <p>Equal in length <i>and</i> pips → neither scores.</p>
+
+      <h3>2 · Sequences — 3+ in suit</h3>
+      <table class="split">
+        <tr><td>Tierce&nbsp;(3)</td><td class="n">3</td><td>Sixième&nbsp;(6)</td><td class="n">16</td></tr>
+        <tr><td>Quart&nbsp;(4)</td><td class="n">4</td><td>Septième&nbsp;(7)</td><td class="n">17</td></tr>
+        <tr><td>Quint&nbsp;(5)</td><td class="n">15</td><td>Huitième&nbsp;(8)</td><td class="n">18</td></tr>
+      </table>
+      <p>Longest wins; equal length → <b>higher top card</b>.</p>
+      <p><span class="warn">The 4 → 15 cliff is real.</span> Never break a possible
+      quint to save a trio.</p>
+
+      <h3>3 · Sets — <b>10 or higher only</b></h3>
+      <table>
+        <tr><td><b>Quatorze</b> — four of a kind</td><td class="n">14</td></tr>
+        <tr><td><b>Trio</b> — three of a kind</td><td class="n">3</td></tr>
+      </table>
+      <p>Nines and below <b>never</b> count. Any quatorze beats any trio; otherwise
+      the higher rank wins.</p>
+    </section>
+
+    <section>
+      <h2>The dialogue</h2>
+      <p><b>Only elder announces.</b> Younger passes verdict on <i>elder's</i>
+      claim — never on their own hand:</p>
+      <table>
+        <tr><td><b>“Good”</b></td><td>Your claim stands — you score it.</td></tr>
+        <tr><td><b>“Not good”</b></td><td>I hold better; you score nothing here.</td></tr>
+        <tr><td><b>“Equal”</b></td><td>Go deeper — see below.</td></tr>
+      </table>
+      <p>On <i>Equal</i> for the point, elder states the pip count and younger
+      answers again; still equal → neither scores. A scoring combination must be
+      <b>shown</b> on demand.</p>
+      <div class="dialogue">
+        <p><span class="who">E:</span> “Point of six.”
+           <span class="who">Y:</span> “Good.” <span class="res">→ E 6</span></p>
+        <p><span class="who">E:</span> “Quart major.”
+           <span class="who">Y:</span> “Good.”
+           <span class="res">→ E 4; Y's own quart scores 0</span></p>
+        <p><span class="who">E:</span> “Nothing else.”
+           <span class="who">Y:</span> “Three queens — three tens.”
+           <span class="res">→ Y 6</span></p>
+      </div>
+      <p><b>Sinking:</b> declare <i>less</i> than you hold — a quart when you have a
+      quint — to hide your hand for the play. You forfeit the difference.</p>
+    </section>
+
+    <section>
+      <h2>Bonuses</h2>
+      <table>
+        <tr><td><b>Carte blanche</b><br>No K, Q or J in your twelve. Declare
+          <i>before discarding</i>.</td><td class="n">10</td></tr>
+        <tr><td><b>Repique</b><br>You reach <b>30+ in declarations alone</b> while
+          the opponent scores <b>zero</b> in declarations. Carte blanche
+          counts.</td><td class="n">60</td></tr>
+        <tr><td><b>Pique</b><br>You reach <b>30+ in declarations and tricks
+          combined</b> before the opponent scores <b>anything</b>.
+          <b>Elder only</b> — elder scores the instant they lead.</td>
+          <td class="n">30</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Play</h2>
+      <p><b>Follow suit if you can</b>; otherwise play anything, and it loses.
+      Highest card of the suit led takes the trick. <b>Elder leads first</b>; the
+      winner leads next.</p>
+      <table>
+        <tr><td>Lead to a trick</td><td class="n">1</td></tr>
+        <tr><td>Win a trick you did <b>not</b> lead</td><td class="n">1</td></tr>
+        <tr><td>Win the <b>last</b> trick</td><td class="n">+1</td></tr>
+        <tr><td><b>The cards</b> — take 7 or more</td><td class="n">10</td></tr>
+        <tr><td><b>Capot</b> — take all twelve</td><td class="n">40</td></tr>
+      </table>
+      <p>Capot replaces the 10. A 6–6 split scores neither player.</p>
+    </section>
+
+    <section>
+      <h2>Scoring the partie</h2>
+      <p><i>Rubicon Piquet.</i> After <b>six deals</b>, compare totals:</p>
+      <table>
+        <tr><td>Loser has <b>100 or more</b></td>
+            <td class="n">difference<br>+ 100</td></tr>
+        <tr><td>Loser has <b>under 100</b><br><b>— rubiconed</b></td>
+            <td class="n">both totals<br>added + 100</td></tr>
+      </table>
+      <p><em>This is why a hopeless loser still fights for scraps: failing to cross
+      100 can cost more than all six deals.</em></p>
+    </section>
+
+    <section>
+      <h2>Elder attacks</h2>
+      <ol>
+        <li><b>Usually take all five.</b> You will never see this much of the talon
+          again.</li>
+        <li><b>Discard toward one long, runnable suit.</b> Leads and captures
+          compound, and capot is worth chasing.</li>
+        <li><b>Count your 30 before declaring</b> — a repique outweighs most
+          hands.</li>
+        <li>Keep an <b>entry</b>, so you can get back in and run the long suit.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Younger defends</h2>
+      <ol>
+        <li>Realistic goal: <b>6–6</b>, or steal the majority when elder
+          overreaches.</li>
+        <li><b>Above all, don't be repiqued.</b> One scoring declaration kills the
+          60.</li>
+        <li><b>Keep guards</b> — a low card in a suit stops elder running it.</li>
+        <li><b>You cannot guard everything.</b> The whole art of younger's discard
+          is choosing which suit to abandon.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Count the hand</h2>
+      <p>The declarations are a near-complete X-ray of your opponent — but
+      <b>each of you chose what to show</b>. Before leading, reconstruct their
+      twelve from what was declared, what was denied, and what the talon must have
+      swallowed.</p>
+      <p><em>This is the skill the whole game rests on.</em></p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Piquet · table reference</span>
+    <span>Rubicon scoring · <span class="hearts">♥</span>
+      <span class="diams">♦</span> ♠ ♣</span>
+  </footer>
+
+</div>
+</body>
+</html>

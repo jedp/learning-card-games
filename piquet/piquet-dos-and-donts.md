@@ -36,14 +36,32 @@ print, the two worked hands for where these come from.*
 - **Throw a scoring combination when it is dead in play.** A quart of `10 9 8 7`
   is worth 4 points and wins nothing. Trading it for length in a live suit is
   normal good play, not a gamble.
-- **Keep a stopper in any suit the opponent is long in.** A stopper is a card
-  that will actually *win* a round and hand you back the lead. Being void is the
-  worst case, not a neutral one: you cannot contest the suit at all, and even
-  their seven takes a trick.
+- **Know which job every card is doing.** A holding in a suit is one of three
+  things, and the third is the one that costs you:
+
+  1. **A stopper** — it will *win* a round and hand you back the lead. Needs an
+     ace, or an honour with enough small cards under it to outlast the cards
+     above it.
+  2. **Fodder** — it will never win, but spending it beats discarding from a
+     suit you care about. *Rank is irrelevant here; cheaper is strictly better.*
+  3. **Neither** — the waste.
+
 - **Never leave an honour bare.** A lone `K` dies under the ace and wins
-  nothing. `K x` survives — you drop the small card under the ace, and the king
-  wins the next round. *The small card is an escort, not a stopper.* It never
-  takes a trick itself; it keeps the big card alive long enough to.
+  nothing. `K x` survives: you drop the small card under the ace and the king
+  wins the next round. *The small card is an escort, not a stopper* — it never
+  takes a trick itself, it keeps the big card alive until it can.
+
+  Verified on hand 2: swapping elder's ♦Q for a second club leaves all three
+  declaration categories identical (12–6) and **costs a trick**. With the
+  escort, ♦K wins trick 11; bare, it dies under the ace at trick 6.
+
+- **In a suit you can only afford one card, keep the LOWEST.** A lone high card
+  is the trap — too valuable to spend as fodder, too weak to stop anything.
+  You have paid a king's price for a job the seven does identically.
+
+- **Length without an honour stops nothing.** `♣10 8` under `♣A K Q 7` takes
+  the same zero tricks as `♣8` alone. Extra low cards change only which of your
+  cards you spend, never who wins the suit.
 - **Respect the cliff.** Quart → quint is **+11**. Never break a possible quint
   to save a trio.
 - **Count your 30 before you throw.** If the discard puts you within reach of a
@@ -57,9 +75,16 @@ print, the two worked hands for where these come from.*
   trick-taking power are different currencies. In `piquet-example-hand-2.md`
   elder's heart quart scored 4 and took **zero tricks**; the discard that
   scored 6 fewer points finished 6 points better off.
-- **Don't strip yourself to two suits.** Voids are how a seven wins a trick.
-- **Don't keep a bare king or a doubleton queen for its own sake.** They lose to
-  the ace *and* cost you a card elsewhere. A queen is worth keeping with two
+- **Don't throw away all your cheap fodder.** A void does not lose you tricks
+  in that suit — low cards were never going to win any. It costs you because
+  every lead into it forces a discard from a suit you *do* care about. That is
+  what stripped younger of a quint major in hand 1. Keep a worthless low card or
+  two as a shield, but only when holding it is genuinely cheap.
+- **Don't expect low cards to hold off length.** To stop the fourth card of a
+  four-card suit you need four yourself. You usually cannot afford that, and two
+  low cards buy you nothing but a delay.
+- **Don't keep a bare king or an unescorted queen.** They lose to the ace *and*
+  cost you a card elsewhere — category 3 above. A queen earns its place with two
   escorts, not with none.
 - **Don't take fewer than five to hold one card back** without a concrete
   reason. In hand 2 the fifth card of the packet was the ♠Q that made the

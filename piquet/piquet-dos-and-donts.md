@@ -12,14 +12,38 @@ print, the two worked hands for where these come from.*
 
 - **Take the maximum.** Elder should take all five almost always: you will never
   see more of the talon, and the cards you leave behind go to your opponent.
-- **Count the hand you are building toward, not the one you hold.** Ask what the
-  five cards *could* turn you into, not what the twelve are worth now.
+- **Count the hand the talon might build, not the one you hold.** You discard
+  *before* you see what you draw, so what you are judging is what your fragments
+  could become. With 12 in hand, 20 cards are unseen:
+
+  | you need… | **elder** (draws 5) | **younger** (draws 3) |
+  |---|---|---|
+  | one specific card | **25%** | 15% |
+  | any of two | **45%** | 28% |
+  | any of three | **60%** | 40% |
+  | any of four | **72%** | 51% |
+
+  *Elder's rule of thumb: any one card you need is a one-in-four shot.*
+
+- **Prefer fragments with several ways to improve.** `♥10 9` becomes a tierce if
+  either the jack or the eight turns up — two chances, 45%. `A K` needing
+  precisely the queen is 25%. Keep the flexible fragment.
+
+- **Ask the trick question too, not just the scoring one.** You are building
+  toward the hand you will *play*, not only the one you will declare. In
+  `piquet-example-hand-2.md` elder's heart quart arrived exactly as planned,
+  scored its 4 points, and took **zero tricks**.
 - **Throw a scoring combination when it is dead in play.** A quart of `10 9 8 7`
   is worth 4 points and wins nothing. Trading it for length in a live suit is
   normal good play, not a gamble.
-- **Keep a low card in every suit you intend to defend.** A guard is what stops
-  a suit running. The three cards that look most worthless are usually the ones
-  holding the hand together.
+- **Keep a stopper in any suit the opponent is long in.** A stopper is a card
+  that will actually *win* a round and hand you back the lead. Being void is the
+  worst case, not a neutral one: you cannot contest the suit at all, and even
+  their seven takes a trick.
+- **Never leave an honour bare.** A lone `K` dies under the ace and wins
+  nothing. `K x` survives — you drop the small card under the ace, and the king
+  wins the next round. *The small card is an escort, not a stopper.* It never
+  takes a trick itself; it keeps the big card alive long enough to.
 - **Respect the cliff.** Quart → quint is **+11**. Never break a possible quint
   to save a trio.
 - **Count your 30 before you throw.** If the discard puts you within reach of a
@@ -35,7 +59,8 @@ print, the two worked hands for where these come from.*
   scored 6 fewer points finished 6 points better off.
 - **Don't strip yourself to two suits.** Voids are how a seven wins a trick.
 - **Don't keep a bare king or a doubleton queen for its own sake.** They lose to
-  the ace and cost you a guard elsewhere.
+  the ace *and* cost you a card elsewhere. A queen is worth keeping with two
+  escorts, not with none.
 - **Don't take fewer than five to hold one card back** without a concrete
   reason. In hand 2 the fifth card of the packet was the ♠Q that made the
   quart — a hand can turn on the card you decline.
@@ -82,7 +107,7 @@ print, the two worked hands for where these come from.*
   possibilities by around 90%.
 - **Cash certain winners early** when you have a long solid suit — the lead
   point plus the discards you force are both real.
-- **Keep guards even when it hurts.** In the first worked hand younger threw a
+- **Keep your stoppers even when it hurts.** In the first worked hand younger threw a
   quint major in hearts and three club honours to hold ♦A K Q, because losing
   the last diamond meant capot: 40 points.
 - **Remember a winner you cannot reach is not a winner.** You can only cash on a
@@ -134,7 +159,8 @@ print, the two worked hands for where these come from.*
 
 1. **Leading a suit headed by the opponent**, losing the lead at trick 4 or 5
    and never getting it back.
-2. **Discarding guards** to chase one more declaration point.
+2. **Discarding stoppers, or stripping an honour of its escort**, to chase one
+   more declaration point.
 3. **Letting a repique happen** by failing to scrape a single scoring
    declaration.
 4. **Missing the 6–6 line** and conceding the cards by one trick.

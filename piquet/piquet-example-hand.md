@@ -96,8 +96,10 @@ diamond above the ♦J stops it, because the moment younger wins a trick elder
 never leads again — elder is void in both of younger's suits, so every heart and
 club younger leads wins by default.
 
-> **The guard lesson:** the cards younger had to save were the three that looked
-> most worthless.
+> **The stopper lesson:** the cards younger had to save were the three that
+> looked least *valuable* — a diamond tierce worth 3, next to a heart quint
+> major worth 15. They were not low cards; they were the only cards that could
+> still **win** a trick in the suit elder was long in.
 
 ## The score
 
@@ -127,5 +129,5 @@ to win, but to reach three figures, because failing means their total gets
    hand.
 7. **Repique denied** by a single scoring declaration — worth 60.
 8. **Counting the opponent's hand** from declarations alone.
-9. **Guards** — one card stands between 5 tricks and capot.
+9. **Stoppers** — one diamond stands between 5 tricks and capot.
 10. **The cards** — 7 tricks to 5, worth 10.

@@ -110,8 +110,12 @@ cost the winner more than the deals did.*
 ## Younger defends
 1. **Realistic goal: 6–6, or steal the majority** when elder overreaches.
 2. **Above all, don't get repiqued.** One scoring declaration kills the 60.
-3. **Keep guards** — a low card in a suit stops elder running it.
-4. **You cannot guard everything.** The whole art of younger's discard is
+3. **Keep a stopper** — a card that can actually *win* a round of the suit.
+   Go void and you cannot contest it at all: even elder's seven takes a trick.
+4. **Never leave an honour bare.** A lone `K` dies under the ace. `K x` lives —
+   you drop the small card under the ace and the king wins the next round. The
+   small card never wins anything itself; it keeps the big one alive.
+5. **You cannot stop everything.** The whole art of younger's discard is
    choosing which suit to abandon.
 
 ## Count the opposing hand

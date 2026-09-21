@@ -105,9 +105,24 @@ print, the two worked hands for where these come from.*
 - **Fight to score *at all* when you are behind.** One scoring declaration kills
   a repique. In the first worked hand, younger's three trios were worth 9 points
   and denied elder 60 — so they were really worth **69**.
-- **Consider sinking when you are far ahead in a category.** Declaring a point
-  of five while holding six costs 1 point and hides a suit length. Cheap, and
-  the opponent's reconstruction is now wrong in a specific way.
+- **Sink as younger. Almost never as elder.** *Sinking* is declaring less than
+  you hold — legal, and often good. You score only what you declare, and you
+  must be able to show it.
+
+  The asymmetry is everything. Younger hears elder's claim **first** and can
+  shave to exactly one better, risking nothing. Elder declares blind.
+
+  > Measured over 200 bot deals: younger's sink lost the category **0 times out
+  > of 52**. Elder's blind sink lost it **76 times out of 130 — 58%**, a net
+  > −436 declaration points. No length threshold rescued it.
+
+- **Sink the point, never the sequences or sets.** Point of five → four costs
+  **1**. Quint → quart costs **11**. Quatorze → trio costs **11**.
+
+- **You may sink the suit as well as the length.** The suit is never stated
+  aloud, only the count. Holding five hearts and four spades, declare "point of
+  four, making 41" and show the **spades**: your opponent learns four spades and
+  nothing about the hearts you mean to run. Misdirection, not just concealment.
 
 ### Don't
 
@@ -115,8 +130,14 @@ print, the two worked hands for where these come from.*
   holding in *that category* is worse than yours. They may hold a quatorze.
 - **Don't forget nines and below never form a set.** Three nines are worth
   nothing; three tens are worth 3.
-- **Don't sink a sequence.** Understating a quint as a quart costs 11. Sinking
-  is for the point, where it costs 1.
+- **Don't ever declare MORE than you hold.** Sinking is legal; overstating is a
+  false declaration and forfeits the category outright. The rule is one-way.
+- **Don't decline a category to stay hidden.** Saying "no point" concedes it,
+  and your opponent then scores *every* combination they hold in it. Conceding
+  the whole category to hide one card is never the trade you want.
+- **Don't sink into a tie.** Equal length *and* equal pips means **neither**
+  player scores. A point of five shaved to four does not cost you 1 point when
+  they also hold four — it costs you all 5.
 - **Don't assume a tie is impossible.** Equal length *and* equal pips in the
   point, or two tierces both headed by an ace, means **neither player scores**.
   It is the cheapest way to lose 15 points there is.

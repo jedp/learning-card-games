@@ -349,9 +349,21 @@ class Strategy(ABC):
         """Pick one card from `legal` to play into the current trick."""
 
     def declared_point(self, me: Player, deal: "Deal", actual: Point) -> Point:
-        """Return the point you *announce*.  Returning less than you hold is a
-        legal piquet play called sinking: it conceals your shape and costs you
-        the difference.  The default is to tell the truth."""
+        """Return the point you *announce*.
+
+        Declaring **less** than you hold is legal and is called sinking: you
+        score only what you declare, you must be able to show it, and in return
+        your opponent's reconstruction of your hand is wrong.  You may also name
+        a different suit entirely -- the suit is never stated aloud, only the
+        count -- which misdirects rather than merely conceals.
+
+        Declaring **more** than you hold is a false declaration and forfeits the
+        category.  Returning Point(0, 0, None) declines it outright, which hands
+        the opponent every combination they hold in it.
+
+        Younger may consult `deal.elder_declared_point`: hearing elder's claim
+        first means younger can shave to exactly one better and risk nothing.
+        The default is to tell the truth."""
         return actual
 
 
@@ -455,15 +467,37 @@ class HeuristicStrategy(Strategy):
 
     # -- declaring --------------------------------------------------------- #
 
-    def declared_point(self, me, deal, actual: Point) -> Point:
-        """Sink by one card when the point is long enough that shaving it still
-        very likely wins.  Costs 1 point, buys concealment."""
-        if not self.style.sink_point or actual.length < 5:
-            return actual
+    def _shavings(self, me, actual: Point):
+        """Progressively shorter honest declarations from the same suit, keeping
+        the highest cards so the pip count stays as large as it can."""
         in_suit = sorted((c for c in me.hand if c.suit == actual.suit),
                          key=lambda c: c.order)
-        shaved = in_suit[:-1]
-        return Point(len(shaved), sum(c.pips for c in shaved), actual.suit)
+        for drop in range(1, len(in_suit)):
+            kept = in_suit[:-drop]
+            yield Point(len(kept), sum(c.pips for c in kept), actual.suit)
+
+    def declared_point(self, me, deal, actual: Point) -> Point:
+        """Sink the point to conceal the shape, at 1 point per card given up."""
+        if not self.style.sink_point or actual.length < 4:
+            return actual
+
+        heard = deal.elder_declared_point
+        if not me.is_elder and heard is not None:
+            # Younger knows what has to be beaten: shave as far as is still safe.
+            best = actual
+            for shorter in self._shavings(me, actual):
+                if shorter.key() > heard.key():
+                    best = shorter
+                else:
+                    break
+            return best
+
+        # Elder declares blind, and measurement says that is a losing game:
+        # over 200 bot deals a blind elder sink lost the point outright 76 times
+        # in 130 (58%), for a net swing of -436 declaration points.  No length
+        # threshold rescued it.  So the bots only sink from the younger chair,
+        # where the information makes it free.
+        return actual
 
     # -- the play ---------------------------------------------------------- #
 
@@ -642,6 +676,55 @@ def _ask_int(prompt: str, low: int, high: int) -> int:
 class HumanStrategy(Strategy):
     is_human = True
 
+    def _yes_no(self, prompt: str) -> bool:
+        while True:
+            reply = input(prompt).strip().lower()
+            if reply in ("y", "yes"):
+                return True
+            if reply in ("n", "no", ""):
+                return False
+            print("  (please answer y or n)")
+
+    def declared_point(self, me, deal, actual: Point) -> Point:
+        heard = deal.elder_declared_point
+        if heard is not None and not me.is_elder:
+            print(f'\n  Elder declared: "Point of {NUMBER[heard.length]}."'
+                  f"   (making {heard.pips})")
+        print(f"\n  Your best point is {actual} in "
+              f"{SUIT_SYMBOL[actual.suit]}.")
+        if not self._yes_no("  Sink it -- declare less, to hide your shape? "
+                            "(y/N) "):
+            return actual
+
+        print("  You score only what you declare, and must be able to show it.")
+        print("  The suit is never stated aloud, so you may name a different one.")
+        options = []
+        for suit in SUITS:
+            in_suit = sorted((c for c in me.hand if c.suit == suit),
+                             key=lambda c: c.order)
+            if in_suit:
+                options.append((suit, in_suit))
+        for i, (suit, cards) in enumerate(options):
+            listing = " ".join("10" if c.rank == "T" else c.rank for c in cards)
+            print(f"    [{i}] {SUIT_SYMBOL[suit]} {listing:<16} "
+                  f"{len(cards)} cards, {sum(c.pips for c in cards)} pips")
+        index = _ask_int("  Declare from which suit? ", 0, len(options) - 1)
+        suit, cards = options[index]
+        count = _ask_int(f"  Declare how many cards?  "
+                         f"(0 = no point at all, max {len(cards)}) ",
+                         0, len(cards))
+        if count == 0:
+            print("  Declaring no point -- your opponent takes the category.")
+            return Point(0, 0, None)
+        kept = cards[:count]
+        declared = Point(count, sum(c.pips for c in kept), suit)
+        forfeit = actual.length - count if suit == actual.suit else actual.length
+        print(f"  Declaring {declared}, showing "
+              f"{' '.join(str(c) for c in kept)}.")
+        if forfeit > 0:
+            print(f"  (giving up {forfeit} point(s) against your best holding)")
+        return declared
+
     def choose_exchange(self, me, deal, low, high) -> list[Card]:
         cards = sort_hand(me.hand)
         print(f"\n  Your hand:  {show_cards(cards)}")
@@ -732,6 +815,7 @@ class Deal:
         self.declaration_score = {"E": 0, "Y": 0}
         self.category_results: list[CategoryResult] = []
         self.announcements: list[str] = []      # what each seat said out loud
+        self.elder_declared_point: Optional[Point] = None
         self.pique_awarded = False
 
     # -- narration --------------------------------------------------------- #
@@ -924,6 +1008,11 @@ class Deal:
         self.say("\n  -- declarations --")
         elder_point = self.elder.strategy.declared_point(
             self.elder, self, best_point(self.elder.hand))
+        # Younger hears elder's claim before answering, and may therefore shave
+        # a declaration down to exactly what still beats it.  Elder declares
+        # blind.  This asymmetry is why elder sinking is a gamble and younger
+        # sinking is nearly free.
+        self.elder_declared_point = elder_point
         younger_point = self.younger.strategy.declared_point(
             self.younger, self, best_point(self.younger.hand))
 

@@ -66,8 +66,13 @@ holds six somewhere, before a card is played. The reply is compulsory.
 > **E:** "Quart major." **Y:** "Good." → E scores 4; **Y's quart scores 0**
 > **E:** "Nothing else." **Y:** "Three queens — three tens." → Y scores 6
 
-**Sinking:** deliberately declare *less* than you hold (a quart when you have a
-quint) to hide your hand for the play. You forfeit the difference. Advanced.
+**Sinking:** declaring *less* than you hold, to hide your shape. Legal — you
+score only what you declare and must be able to show it. **Declaring more is a
+false declaration and forfeits the category.** You may also name a *different
+suit*, since the suit is never said aloud.
+**Safe for younger** (who hears elder's claim first and can shave to exactly one
+better); **a gamble for elder**, who declares blind. Sink the point (costs 1),
+not a quint (costs 11).
 
 ## Bonuses
 - **Carte blanche — 10.** No K, Q, or J in your 12. Declare **before discarding**.

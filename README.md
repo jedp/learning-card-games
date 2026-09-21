@@ -6,4 +6,7 @@ Python programs for playing against opponents with different skill levels and st
 
 The programs output logs that can be analyzed by another person or your AI to critique your game.
 
+- [Piquet](./piquet/)
+- [Skat](./skat/)
+
 Written with Claude Opus 4.8.
